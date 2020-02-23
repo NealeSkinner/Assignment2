@@ -315,7 +315,7 @@ for i = 1:nx
     for j = 1:ny
         if j <= (ny/3) || j >= (ny*2/3)
             if i >= (nx/3) && i <= (nx*2/3)
-                Sigma(i,j) = s;
+                Sigma(i,j) = 1e-12;
             end
             
         end
@@ -455,8 +455,8 @@ J=Sigma .* TotalE;
 sumJ=sum(J,'All');
 figure(8);
 hold on
-plot([s s], [oldJ sumJ], 'o')
-xlim([1e-12 0.9])
+plot(s, sumJ, 'o')
+%xlim([1e-12 0.9])
 xlabel('Sigma');
 ylabel('Current');
 title('Current vs Sigma');
