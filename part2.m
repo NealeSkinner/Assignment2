@@ -121,7 +121,9 @@ F = zeros(nx*ny,1);
 J=0;
 TotalE=0;
 sigma=0;
-for meshsize = 1:5
+%run through the original code but iterate extra times for in increase in
+%size. 
+for meshsize = 1:1:5
     for i = 1:nx
         for j = 1:ny
 
@@ -219,7 +221,6 @@ end
 %%%%%%%%%%%%%%%%%%%%Part C%%%%%%%%%%%%%%
 % change the size of our boxes inside dimensions and see effect on current
 % density. 
-% Sigma
 sigma1 = ones(nx,ny);
 sigma2 = ones(nx,ny);
 sigma3 = ones(nx,ny);
@@ -249,7 +250,89 @@ for i = 1:nx %Changing the lengths and widths
         end
         end
 end 
+for i = 1:nx
+    for j = 1:ny
+        
+        n = i + (j - 1) * nx; 
+        nym = i + (j - 2) * nx; 
+        nyp = i + j * nx; 
+        nxm = i - 1 + (j - 1) * nx; 
+        nxp = i + 1 + (j - 1) * nx; 
+        
+        if i == 1
+            G(n, n) = 1; 
+            F(n) = 1;
+        elseif i == nx
+            G(n, n) = 1; 
+            F(n) = 1;
+        elseif j == 1
+            G(n, n) = 1; 
+        elseif j == ny
+            G(n, n) = 1; 
+        else
+            G(n, n) = -4; 
+            G(n, nxm) = 1; 
+            G(n, nxp) = 1; 
+            G(n, nym) = 1; 
+            G(n, nyp) = 1; 
+        end
+    end
+end
 
+Voltmap2 = zeros(nx, ny); 
+Ex=zeros (nx, ny);
+Ey=zeros (nx, ny); 
+V = G\F; 
+
+for i = 1:nx
+    for j = 1:ny
+        n = i + (j - 1)*nx;
+        Voltmap2(i, j) = V(n); 
+    end
+end
+ for i = 1:nx
+    for j = 1:ny
+        if i == 1
+            Ex(i, j) = Voltmap2(i+1, j) - Voltmap2(i, j); 
+        elseif i == nx
+            Ex(i, j) = Voltmap2(i, j) - Voltmap2(i-1, j);
+        else
+            Ex(i, j) = (Voltmap2(i+1, j) - Voltmap2(i-1, j))*0.5;
+        end
+        
+        if j == 1
+            Ey(i, j) = Voltmap2(i, j+1) - Voltmap2(i, j); 
+        elseif j == ny
+            Ey(i, j) = Voltmap2(i, j) - Voltmap2(i, j-1);
+        else
+            Ey(i, j) = (Voltmap2(i, j+1) - Voltmap2(i, j-1))*0.5;
+        end
+    end
+end
+Sigma = ones(nx,ny);
+
+for i = 1:nx
+    for j = 1:ny
+        if j <= (ny/3) || j >= (ny*2/3)
+            if i >= (nx/3) && i <= (nx*2/3)
+                Sigma(i,j) = s;
+            end
+            
+        end
+    end
+end
+
+TotalE= Ex + Ey;
+J1=sigma1 .* TotalE;
+J2=sigma2 .* TotalE;
+J3=sigma3 .* TotalE;
+J4=sigma4 .* TotalE;
+sumJ1=sum(J1,'All');
+sumJ2=sum(J2,'All');
+sumJ3=sum(J3,'All');
+sumJ4=sum(J4,'All');
+TotalJ=[sumJ1 sumJ2 sumJ3 sumJ4];
+TotalSigma=[sigma1 sigma2 sigma3 sigma4];
 figure(6);
 subplot(2,2,1)
 mesh(sigma1);
@@ -271,9 +354,17 @@ mesh(sigma4);
 xlabel('X');
 ylabel('Y');
 title('Sigma4 Map');
+figure(7)
+plot([1 2 3 4], TotalJ)
+xticks([1 2 3 4])
+xlabel('Sigma #')
+ylabel('Current')
+title('current vs Sigma Map')
 %%%%%%%%%%%%%%%Part D%%%%%%%%%%
 sumJ=0;
 oldJ=0;
+J=0;
+TotalE=0;
 for s= 1e-12:0.01:0.9
 x= 3;           % x dimension
 y=2;            % y dimension
@@ -359,14 +450,15 @@ for i = 1:nx
     end
 end
 oldJ=sumJ;
-TotalE= Ex + Ey;
+TotalE= sqrt(Ex.^2 + Ey.^2);
 J=Sigma .* TotalE;
 sumJ=sum(J,'All');
-figure(7);
+figure(8);
 hold on
-plot([s s], [oldJ sumJ])
-%mesh(Sigma);
+plot([s s], [oldJ sumJ], 'o')
+xlim([1e-12 0.9])
 xlabel('Sigma');
 ylabel('Current');
 title('Current vs Sigma');
 end
+hold off

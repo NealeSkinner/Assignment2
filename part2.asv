@@ -84,7 +84,7 @@ xlabel('x')
 ylabel('y')
 %create the sigma matrix of ones. could have chosen 0, or 1. 
 sigma = ones(nx,ny);
-%
+%iterate through the points and change where the bottle neck is. 
 for i = 1:nx
     for j = 1:ny
         if j <= (ny/3) || j >= (ny*2/3)
@@ -95,16 +95,17 @@ for i = 1:nx
         end
     end
 end
-
+%find the total electric field
 TotalE= sqrt(Ex.^2+ Ey.^2);
+%J is the total electric field where sigma is. 
 J=sigma .* TotalE;
-
+% plot sigma map
 figure(3);
 mesh(sigma);
 xlabel('X');
 ylabel('Y');
 title('Sigma Map');
-
+%plot current density map
 figure(4)
 mesh(J)
 title('Current Density Map')
@@ -117,7 +118,14 @@ TotalCurrent=0;
 TotalE=0 ;
 G = sparse(nx*ny,nx*ny);
 F = zeros(nx*ny,1);
-for meshsize = 1:5
+J=0;
+TotalE=0;
+sigma=0;
+for meshsize = 1:1:5
+
+    J=0;
+    TotalE=0;
+    sigma=0;
     for i = 1:nx
         for j = 1:ny
 
